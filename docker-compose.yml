@@ -1,0 +1,116 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: myproject-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: mydatabase
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    restart: always
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - NODE_ENV
+      - DATABASE_URL=postgres://admin:admin@db:5432/mydatabase
+      - JWT_SECRET=mysecretkey
+    ports:
+      - "4000:4000"
+    networks:
+      - backend
+    depends_on:
+      - db
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - frontend
+    depends_on:
+      - backend
+    restart: always
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+    restart: always
+
+  grafana:
+    image: grafana/grafana-oss:10.2.2
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - monitoring
+    restart: always
+
+  sonarqube:
+    image: sonarqube:lts
+    container_name: sonarqube
+    environment:
+      - sonar.jdbc.url=jdbc:postgresql://db:5432/sonar
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.password=sonar
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+    ports:
+      - "9000:9000"
+    networks:
+      - monitoring
+    restart: always
+
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    networks:
+      - monitoring
+    restart: always
+
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - proxy
+    restart: always
+
+networks:
+  frontend:
+  backend:
+  monitoring:
+  proxy:
+
+volumes:
+  db-data:
+  grafana-data:
+  sonarqube-data:
