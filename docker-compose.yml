@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: mydatabase
+      POSTGRES_DB: mydatabase  # La base pour ton application
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
@@ -14,12 +14,27 @@ services:
     ports:
       - "5432:5432"
 
+  sonarqube-db:  # Nouvelle base de données dédiée pour SonarQube
+    image: postgres:15-alpine
+    container_name: sonarqube-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar  # Base de données dédiée à SonarQube
+    volumes:
+      - sonarqube-db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    restart: always
+    ports:
+      - "5433:5432"  # On change le port pour éviter les conflits avec la base de l'application
+
   backend:
     build:
       context: ./backend
     environment:
       - NODE_ENV
-      - DATABASE_URL=postgres://admin:admin@db:5432/mydatabase
+      - DATABASE_URL=postgres://admin:admin@db:5432/mydatabase  # Utilise ta base "mydatabase" pour l'app
       - JWT_SECRET=mysecretkey
     ports:
       - "4000:4000"
@@ -68,7 +83,7 @@ services:
     image: sonarqube:lts
     container_name: sonarqube
     environment:
-      - sonar.jdbc.url=jdbc:postgresql://db:5432/sonar
+      - sonar.jdbc.url=jdbc:postgresql://sonarqube-db:5432/sonar  # Utilisation de la base "sonar"
       - sonar.jdbc.username=sonar
       - sonar.jdbc.password=sonar
     volumes:
@@ -77,6 +92,8 @@ services:
       - "9000:9000"
     networks:
       - monitoring
+    depends_on:
+      - sonarqube-db  # Assure-toi que la base SonarQube est prête avant de démarrer SonarQube
     restart: always
 
   jenkins:
@@ -112,5 +129,6 @@ networks:
 
 volumes:
   db-data:
+  sonarqube-db-data:  # Volume spécifique pour la base SonarQube
   grafana-data:
   sonarqube-data:

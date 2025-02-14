@@ -19,8 +19,10 @@ pipeline {
                     dir('backend') {
                         script {
                             def backendImage = "${env.DOCKER_REPO_BACKEND}:${env.BUILD_NUMBER}"
-                            sh "docker build -t ${backendImage} ."
-                            sh "docker push ${backendImage}"
+                            withDockerRegistry(credentialsId: 'docker-hub-credentials') {
+                                sh "docker build -t ${backendImage} ."
+                                sh "docker push ${backendImage}"
+                            }
                         }
                     }
                 }
@@ -28,8 +30,10 @@ pipeline {
                     dir('frontend') {
                         script {
                             def frontendImage = "${env.DOCKER_REPO_FRONTEND}:${env.BUILD_NUMBER}"
-                            sh "docker build -t ${frontendImage} ."
-                            sh "docker push ${frontendImage}"
+                            withDockerRegistry(credentialsId: 'docker-hub-credentials') {
+                                sh "docker build -t ${frontendImage} ."
+                                sh "docker push ${frontendImage}"
+                            }
                         }
                     }
                 }
