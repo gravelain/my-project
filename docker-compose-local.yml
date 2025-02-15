@@ -1,0 +1,53 @@
+services:
+  # Base de données MySQL pour le backend
+  db_mysql:
+    image: mysql:8.0
+    container_name: myproject-db-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminpassword
+    volumes:
+      - db-mysql-data:/var/lib/mysql
+    networks:
+      - backend
+    restart: always
+    ports:
+      - "3307:3306"  # Port modifié pour éviter conflit
+
+  # Service backend (par exemple, NestJS)
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env.local  # Utilisation du fichier .env.local
+    ports:
+      - "4001:4000"  # Port modifié pour éviter conflit
+    networks:
+      - backend
+    depends_on:
+      - db_mysql
+    restart: always
+
+  # Service frontend (par exemple, Next.js)
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3002:3000"  # Port modifié pour éviter conflit
+    networks:
+      - frontend
+    depends_on:
+      - backend
+    restart: always
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  db-mysql-data:
