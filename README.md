@@ -20,7 +20,7 @@ Ce projet repose sur une architecture **microservices** où chaque composant (fr
 
 L'application s’appuie sur **SonarQube** pour l'analyse de la qualité du code et utilise des bases de données **PostgreSQL** pour SonarQube et **MySQL** pour les données métiers de l’application. **Prometheus** et **Grafana** sont utilisés pour la collecte et la visualisation des métriques de performance.
 
-Le projet est déployé sur un **VPS AWS** avec l'IP [95.111.240.167](http://95.111.240.167/).
+Le projet est déployé sur un **VPS** avec l'IP [95.111.240.167](http://95.111.240.167/).
 
 ## Technologies utilisées
 
@@ -38,38 +38,74 @@ Le projet est déployé sur un **VPS AWS** avec l'IP [95.111.240.167](http://95.
 | **SonarQube**  | Analyse de code | Outil pour analyser la qualité du code et détecter les vulnérabilités. |
 | **Traefik**  | Proxy inverse et Load Balancer | Permet de gérer le routage du trafic et l'équilibrage de charge, avec des fonctionnalités SSL et de sécurité. |
 
-## Architecture du projet
-
-La structure du projet est la suivante :
-
 
 
 ---
 
+
+
 ## 📂 Structure du Projet
 
-```bash
+
 my-project/
-├── backend/       # Code source du backend (NestJS)
-├── frontend/      # Code source du frontend (Next.js)
-├── grafana/       # Configuration Grafana
-├── jenkins/       # Configuration Jenkins
-├── monitoring/    # Fichiers de configuration pour Prometheus
-├── prometheus/    # Configuration Prometheus
-├── scripts/       # Scripts utilitaires
-├── sonarqube/     # Configuration SonarQube
-├── traefik/       # Configuration Traefik
-├── docker-compose.yml             # Configuration principale des services Docker
-├── docker-compose.dev.yml         # Configuration spécifique pour l'environnement de développement
-├── docker-compose.preprod.yml     # Configuration pré-production
-├── docker-compose.prod.yml        # Configuration production
-└── .env.*                         # Fichiers d'environnement
-```
+├── backend/                  # Code source du backend (NestJS)
+│   ├── Dockerfile            # Dockerfile pour construire l'image du backend
+│   ├── package.json          # Définition des dépendances et scripts NPM
+│   ├── package-lock.json     # Verrouillage des versions des dépendances
+│   └── src/                  # Code source de l'application NestJS
+│       ├── main.ts           # Point d'entrée de l'application
+│       ├── app.module.ts     # Module principal de l'application
+│       ├── app.controller.ts # Exemple de contrôleur
+│       └── app.service.ts    # Exemple de service
+│       └── ...               # Autres modules, controllers, services, etc.
+│
+├── frontend/                 # Code source du frontend (Next.js)
+│   ├── Dockerfile            # Dockerfile pour construire l'image du frontend
+│   ├── package.json          # Dépendances et scripts de l'application Next.js
+│   ├── package-lock.json     # Verrouillage des versions
+│   └── pages/                # Pages de l'application Next.js
+│       ├── index.js          # Page d'accueil
+│       ├── _app.js           # Configuration globale de Next.js
+│       └── ...               # Autres pages et composants
+│
+├── grafana/                  # Configuration et dashboards Grafana
+│   ├── dashboards/           # Fichiers JSON des dashboards personnalisés
+│   └── grafana.ini           # Fichier de configuration de Grafana (optionnel)
+│
+├── jenkins/                  # Configuration de Jenkins pour CI/CD
+│   ├── data/                 # Volume de persistance (jobs, plugins, configuration)
+│   └── Jenkinsfile           # Pipeline Jenkins définissant les étapes CI/CD
+│
+├── monitoring/               # Fichiers de configuration pour la surveillance
+│   └── alerting/             # Scripts/fichiers pour la gestion des alertes (optionnel)
+│
+├── prometheus/               # Configuration de Prometheus
+│   └── prometheus.yml        # Fichier principal de configuration de Prometheus
+│
+├── scripts/                  # Scripts utilitaires et de déploiement
+│   ├── deploy.sh             # Script pour déployer l'infrastructure
+│   └── backup.sh             # Script de sauvegarde des données (optionnel)
+│
+├── sonarqube/                # Configuration de SonarQube (personnalisable)
+│   └── sonar.properties      # Fichier de configuration de SonarQube (optionnel)
+│
+├── traefik/                  # Configuration du reverse proxy Traefik
+│   └── traefik.yml           # Fichier de configuration principal de Traefik
+│
+├── docker-compose.yml        # Configuration principale des services Docker (production)
+├── docker-compose.dev.yml    # Configuration spécifique pour l'environnement de développement
+├── docker-compose.preprod.yml# Configuration pour l'environnement de préproduction
+├── docker-compose.prod.yml   # Configuration pour l'environnement de production
+│
+└── .env.*                    # Fichiers d'environnement (ex : .env, .env.local, .env.production)
+
+
 
 ---
 
 
 ## Services et ports d’accès
+
 
 | Service               | Conteneur         | Port Local | Port VPS (Accès Public) | Description                      |
 |-----------------------|-------------------|------------|-------------------------|----------------------------------|
@@ -94,7 +130,7 @@ dbackend : Démarrer uniquement le backend
 dfrontend : Démarrer uniquement le frontend
 
 
-```bash
+
 ---
 
 ## 🛠 Services Définis
@@ -136,6 +172,7 @@ dfrontend : Démarrer uniquement le frontend
 
 ---
 
+
 ## 🔄 CI/CD & Déploiement
 L'intégration continue et le déploiement sont gérés avec **Jenkins** sur un **VPS**. Jenkins est configuré pour :
 - Exécuter des tests automatisés (linting, unit tests, intégration...)
@@ -144,11 +181,13 @@ L'intégration continue et le déploiement sont gérés avec **Jenkins** sur un 
 
 Grâce à cette infrastructure, les nouvelles versions du projet sont automatiquement testées et déployées en production de manière sécurisée et optimisée.
 
+
 ---
 
 ## 🚀 Utilisation avec Docker Compose
 
 ### 🌟 Définition de l'environnement
+
 Ajoutez cette fonction à votre `.bashrc` ou `.zshrc` :
 
 ```bash
@@ -169,8 +208,10 @@ dcenv() {
 
 
 ### 🌟 Choisir son environnement
+
 En fonction de si vous souhaitez travailler en dev, preprod ou prod, il faudrait selectionner son 
 environnement de travail avant de démarrer les services : choisi ton env et tape la commande appropriée! 
+
 ```bash
 dcenv dev  #  ✅ Environnement défini sur : dev
 ```
