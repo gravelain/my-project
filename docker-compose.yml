@@ -1,47 +1,70 @@
 services:
-  db:
-    image: postgres:15-alpine
-    container_name: myproject-db
+  # Service de la base de données PostgreSQL pour SonarQube
+  db_postgresql:
+    image: postgres:latest
+    container_name: sonarqube-db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: mydatabase  # La base pour ton application
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     networks:
-      - backend
+      - monitoring
     restart: always
     ports:
       - "5432:5432"
 
-  sonarqube-db:  # Nouvelle base de données dédiée pour SonarQube
-    image: postgres:15-alpine
-    container_name: sonarqube-db
+  # Service SonarQube avec PostgreSQL comme base de données
+  sonarqube:
+    image: sonarqube:lts
+    container_name: sonarqube
     environment:
-      POSTGRES_USER: sonar
-      POSTGRES_PASSWORD: sonar
-      POSTGRES_DB: sonar  # Base de données dédiée à SonarQube
+      - sonar.jdbc.url=jdbc:postgresql://sonarqube-db:5432/sonar
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.password=sonar
     volumes:
-      - sonarqube-db-data:/var/lib/postgresql/data
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    ports:
+      - "9000:9000"
+    networks:
+      - monitoring
+    restart: always
+    depends_on:
+      - db_postgresql
+
+  # Autres services de ton application (backend, frontend, etc.)
+  db_mysql:
+    image: mysql:8.0
+    container_name: myproject-db-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminpassword
+    volumes:
+      - db-mysql-data:/var/lib/mysql
     networks:
       - backend
     restart: always
     ports:
-      - "5433:5432"  # On change le port pour éviter les conflits avec la base de l'application
+      - "3306:3306"
 
   backend:
     build:
       context: ./backend
     environment:
       - NODE_ENV
-      - DATABASE_URL=postgres://admin:admin@db:5432/mydatabase  # Utilise ta base "mydatabase" pour l'app
+      - DATABASE_URL=mysql://admin:adminpassword@db_mysql:3306/mydatabase
       - JWT_SECRET=mysecretkey
     ports:
       - "4000:4000"
     networks:
       - backend
     depends_on:
-      - db
+      - db_mysql
     restart: always
 
   frontend:
@@ -79,23 +102,6 @@ services:
       - monitoring
     restart: always
 
-  sonarqube:
-    image: sonarqube:lts
-    container_name: sonarqube
-    environment:
-      - sonar.jdbc.url=jdbc:postgresql://sonarqube-db:5432/sonar  # Utilisation de la base "sonar"
-      - sonar.jdbc.username=sonar
-      - sonar.jdbc.password=sonar
-    volumes:
-      - sonarqube-data:/opt/sonarqube/data
-    ports:
-      - "9000:9000"
-    networks:
-      - monitoring
-    depends_on:
-      - sonarqube-db  # Assure-toi que la base SonarQube est prête avant de démarrer SonarQube
-    restart: always
-
   jenkins:
     image: jenkins/jenkins:lts-jdk17
     container_name: jenkins
@@ -125,10 +131,13 @@ networks:
   frontend:
   backend:
   monitoring:
+    driver: bridge
   proxy:
 
 volumes:
-  db-data:
-  sonarqube-db-data:  # Volume spécifique pour la base SonarQube
+  db-mysql-data:
+  postgres-data:  # Volume pour persister les données de PostgreSQL
   grafana-data:
   sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
