@@ -1,7 +1,48 @@
-# 📘 My Project - The tip top 
+# My Project - The Tip Top
 
-Ce projet est une plateforme web de jeu concours permettant aux utilisateurs de remporter des lots grâce à un code de jeu obtenu sur leur ticket de caisse. Il utilise Docker Compose v2 pour orchestrer plusieurs services, incluant une base de données PostgreSQL, un backend NestJS, un frontend Next.js, ainsi que des outils de monitoring et d'intégration continue comme Prometheus, Grafana, SonarQube, Jenkins et Traefik.
-Le déploiement est fait sur notre vps : AWS
+Bienvenue dans le projet **"My Project - The Tip Top"**, une plateforme web de jeu concours permettant aux utilisateurs de remporter des lots via un code de jeu obtenu sur leur ticket de caisse. Ce projet repose sur une architecture **microservices**, conteneurisée avec **Docker** et orchestrée via **Docker Compose v2**.
+
+## Table des matières
+
+1. [Introduction](#introduction)
+2. [Technologies utilisées](#technologies-utilisées)
+3. [Architecture du projet](#architecture-du-projet)
+4. [Services et ports d’accès](#services-et-ports-daccès)
+5. [Configuration de l’environnement](#configuration-de-lenvironnement)
+6. [Commandes utiles](#commandes-utiles)
+7. [Démarrer les services](#démarrer-les-services)
+8. [Accéder aux conteneurs](#accéder-aux-conteneurs)
+9. [Conclusion](#conclusion)
+
+## Introduction
+
+Ce projet repose sur une architecture **microservices** où chaque composant (frontend, backend, base de données, monitoring) est conteneurisé dans un **Docker**. L’infrastructure utilise **Docker Compose** pour l’orchestration des services et **Traefik** comme proxy inverse. Le backend est développé avec **NestJS** et le frontend avec **Next.js**.
+
+L'application s’appuie sur **SonarQube** pour l'analyse de la qualité du code et utilise des bases de données **PostgreSQL** pour SonarQube et **MySQL** pour les données métiers de l’application. **Prometheus** et **Grafana** sont utilisés pour la collecte et la visualisation des métriques de performance.
+
+Le projet est déployé sur un **VPS AWS** avec l'IP [95.111.240.167](http://95.111.240.167/).
+
+## Technologies utilisées
+
+| Technologie  | Utilité  | Justification  |
+|--------------|---------|----------------|
+| **NestJS**  | Backend | Framework modulaire et scalable basé sur Node.js avec support TypeScript, idéal pour des APIs performantes. |
+| **Next.js**  | Frontend | Framework React optimisé pour le rendu côté serveur (SSR) et les performances SEO. |
+| **PostgreSQL** | Base de données (SonarQube) | Base relationnelle robuste et performante, utilisée pour stocker les données de SonarQube. |
+| **MySQL** | Base de données (Application) | Base de données SQL légère et rapide pour gérer les données métiers de l'application. |
+| **Docker**  | Conteneurisation | Permet l’isolation des services et assure la portabilité entre les environnements. |
+| **Docker Compose**  | Orchestration des services | Facilite la gestion de multiples conteneurs et leurs dépendances. |
+| **Jenkins**  | CI/CD | Automatisation des tests, des builds, et des déploiements. |
+| **Prometheus**  | Monitoring | Outil de collecte et de stockage de métriques pour surveiller l’application. |
+| **Grafana**  | Visualisation | Interface graphique pour suivre les métriques collectées par Prometheus. |
+| **SonarQube**  | Analyse de code | Outil pour analyser la qualité du code et détecter les vulnérabilités. |
+| **Traefik**  | Proxy inverse et Load Balancer | Permet de gérer le routage du trafic et l'équilibrage de charge, avec des fonctionnalités SSL et de sécurité. |
+
+## Architecture du projet
+
+La structure du projet est la suivante :
+
+
 
 ---
 
@@ -27,17 +68,33 @@ my-project/
 
 ---
 
-## 🛠 Technologies Utilisées
 
-- **NestJS** : Framework Node.js utilisé pour construire des API backend performantes et évolutives.
-- **Next.js** : Framework React pour le frontend, offrant un rendu côté serveur (SSR) et des performances optimisées.
-- **PostgreSQL** : Base de données relationnelle robuste et performante.
-- **Docker & Docker Compose** : Conteneurisation et orchestration des services.
-- **Jenkins** : Serveur CI/CD permettant l’automatisation des déploiements et des tests.
-- **Prometheus & Grafana** : Outils de monitoring et visualisation des métriques.
-- **SonarQube** : Analyse statique du code pour améliorer la qualité et détecter les vulnérabilités.
-- **Traefik** : Reverse proxy et gestionnaire de certificats pour l'exposition sécurisée des services.
+## Services et ports d’accès
 
+| Service               | Conteneur         | Port Local | Port VPS (Accès Public) | Description                      |
+|-----------------------|-------------------|------------|-------------------------|----------------------------------|
+| **Frontend (Next.js)** | frontend          | 3000       | 95.111.240.167:3000      | Interface utilisateur           |
+| **Backend (NestJS)**   | backend           | 4000       | 95.111.240.167:4000      | API RESTful du backend          |
+| **Base de Données (MySQL)** | db_mysql        | 3306       | 95.111.240.167:3306      | Base de données MySQL pour l'application |
+| **SonarQube**          | sonarqube         | 9000       | 95.111.240.167:9000      | Analyse de code et qualité du projet |
+| **Base de Données (PostgreSQL pour SonarQube)** | db_postgresql  | 5432       | 95.111.240.167:5432      | Base de données PostgreSQL pour SonarQube |
+| **Prometheus**         | prometheus        | 9090       | 95.111.240.167:9090      | Collecte des métriques          |
+| **Grafana**            | grafana           | 3001       | 95.111.240.167:3001      | Visualisation des métriques     |
+| **Jenkins**            | jenkins           | 8080, 50000| 95.111.240.167:8080      | CI/CD et gestion des pipelines  |
+| **Traefik**            | traefik           | 80         | 95.111.240.167:80        | Proxy inverse et Load Balancer  |
+
+## Configuration de l’environnement
+
+Commandes utiles
+dcu : Démarre les services en arrière-plan
+dcd : Arrêt des services
+dcr : Redémarrage des services
+dcl : Voir les logs globaux
+dbackend : Démarrer uniquement le backend
+dfrontend : Démarrer uniquement le frontend
+
+
+```bash
 ---
 
 ## 🛠 Services Définis
