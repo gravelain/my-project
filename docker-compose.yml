@@ -53,8 +53,7 @@ services:
       - "3306:3306"
 
   backend:
-    build:
-      context: ./backend
+    image: thierrytemgoua98/my-project-backend:latest
     environment:
       - NODE_ENV
       - DATABASE_URL=mysql://admin:adminpassword@db_mysql:3306/mydatabase
@@ -68,8 +67,7 @@ services:
     restart: always
 
   frontend:
-    build:
-      context: ./frontend
+    image: thierrytemgoua98/my-project-frontend:latest
     ports:
       - "3000:3000"
     networks:
